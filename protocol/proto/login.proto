@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+option go_package = "github.com/kim118000/protocol/proto/login;login";
+package protocol;
+
+message LoginInfo {
+  fixed64 user_id = 1;
+  fixed32 server_id = 2;
+}

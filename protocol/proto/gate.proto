@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option go_package = "github.com/kim118000/protocol/proto/gate;gate";
+package protocol;
+
+message AuthenticationRequest {
+  fixed64 user_id = 1;
+  fixed32 token_ts = 2;
+  string sign = 3;
+}
+
+message AuthenticationResponse {
+  bool ok = 1;
+}

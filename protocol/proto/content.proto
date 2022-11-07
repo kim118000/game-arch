@@ -1,0 +1,27 @@
+syntax = "proto3";
+option go_package = "github.com/kim118000/protocol/proto/common/content;content";
+
+import "messageId.proto";
+import "errorId.proto";
+
+package protocol;
+
+message ClientInboundMessage {
+  MessageId message_id = 1;
+  int32 request_id = 2;
+  bytes content = 3;
+}
+
+//客户端输出消息正文
+message ClientOutboundContent {
+  //消息编号
+  MessageId message_id = 1;
+  //内容字节流
+  bytes content = 2;
+}
+
+message ClientOutboundMessage {
+  int32 request_id = 1;
+  CodeId code_id = 2;
+  repeated ClientOutboundContent outbound_content = 3; //响应内容 key为messageId的int值，value为对应消息的字节流
+}

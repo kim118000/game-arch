@@ -1,0 +1,6 @@
+
+ServerPort = 8999
+ServerName = "gate"
+
+[LogConfig]
+Level = -1

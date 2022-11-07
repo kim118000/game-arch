@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+option go_package = "github.com/kim118000/protocol/proto/common/id;id";
+package protocol;
+
+enum CodeId {
+  SUCCESS = 0; //执行成功
+}

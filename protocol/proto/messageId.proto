@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option go_package = "github.com/kim118000/protocol/proto/common/id;id";
+package protocol;
+
+enum MessageId {
+  //客户端发送的消息
+  NONE = 0; //无
+  //request
+  TO_SERVER_LOGIN = 1;
+
+  //response
+  TO_CLIENT_LOGIN = 10001;
+}

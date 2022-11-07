@@ -1,0 +1,41 @@
+syntax = "proto3";
+option go_package = "github.com/kim118000/protocol/proto/server/cluster;cluster";
+
+import "messageId.proto";
+import "errorId.proto";
+import "content.proto";
+
+package protocol;
+
+
+enum EndPointType {
+  ENDPOINT_NONE = 0;
+  ENDPOINT_CLIENT = 1;
+  ENDPOINT_GATE = 2;
+  ENDPOINT_GAME = 3;
+}
+
+enum MessageCategory {
+  MESSAGE_CATEGORY_NONE = 0;
+  MESSAGE_CATEGORY_CLIENT_IN = 1;
+  MESSAGE_CATEGORY_CLIENT_OUT = 2;
+  MESSAGE_CATEGORY_RPC_REQUEST = 3;
+  MESSAGE_CATEGORY_RPC_RESPONSE = 4;
+}
+
+message RPCMessage {
+  MessageCategory message_category = 1;   //消息大类
+  MessageId message_id = 2;   //当category为clientout时，此字段无效
+  int32 request_id = 3;//RPC请求ID
+  int32 client_request_id = 4;//客户端请求ID
+  bytes content = 5;   //当category为clientout时，此字段无效
+  fixed64 user_id = 6;
+  CodeId code_id = 7;
+  repeated ClientOutboundContent client_content = 8; //仅当category为clientout时，此字段有效。发送给客户端的消息内容
+}
+
+//连接请求
+message ClusterClientConnectMessage{
+  EndPointType serverType = 1;
+  fixed32 serverId = 2;
+}
