@@ -5,49 +5,37 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/kim118000/core/pkg/config"
 	"github.com/kim118000/core/pkg/network"
+	"github.com/kim118000/core/toolkit"
 	"github.com/kim118000/core/toolkit/file"
-	"github.com/kim118000/gate/asset/arena_asset"
-	"github.com/kim118000/gate/gconfig"
-	"github.com/kim118000/gate/logger"
-	"github.com/kim118000/gate/mgr"
-	"github.com/kim118000/gate/msg/handler"
-	"os"
-	"os/signal"
-	"syscall"
+	"github.com/kim118000/gate/internal/asset/arena_asset"
+	"github.com/kim118000/gate/internal/conf"
+	"github.com/kim118000/gate/internal/handler"
+	"github.com/kim118000/gate/internal/service"
 )
 
 func main() {
 
-	conf := file.PathJoin("conf/conf.toml")
+	confFile := file.PathJoin("conf/conf.toml")
 
-	var serverConfig *gconfig.ServerConfig
-	if _, err := toml.DecodeFile(conf, &serverConfig); err != nil {
+	var serverConfig *conf.ServerConfig
+	if _, err := toml.DecodeFile(confFile, &serverConfig); err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	logger.InitLogger(&serverConfig.LogConfig)
+	service.InitService(serverConfig)
 
 	loader := config.NewFileLoader(file.PathJoin("json"))
-
 	manager := config.NewConfigManager(loader)
 	manager.RegTemplate(arena_asset.ArenaTemplate)
 	manager.LoadTemplate()
 
-	server := network.NewServer("gate", "", 8999, 1000, 1000, outProcessor(), inProcessor(), network.WithConnEvent(mgr.ConnEvent))
-
+	server := network.NewServer("gate", "", 8999, 1000, 1000, outProcessor(), inProcessor(), network.WithConnEvent(service.ConnEvent))
 	server.Start()
 
-	sg := make(chan os.Signal)
-	signal.Notify(sg, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGKILL, syscall.SIGTERM)
-
-	// stop server
-	select {
-	case signal := <-sg:
-		server.Stop()
-		logger.Info.Infof("got signal: %v, shutting down...", signal)
-	}
-
+	toolkit.RegisterSignal(func() {
+		service.StopService()
+	})
 }
 
 

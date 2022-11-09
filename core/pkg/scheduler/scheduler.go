@@ -1,7 +1,7 @@
 package scheduler
 
 import (
-	"github.com/kim118000/core/pkg/log"
+	logger2 "github.com/kim118000/core/pkg/logger"
 	"sync/atomic"
 	"time"
 )
@@ -56,7 +56,7 @@ func Close() {
 	}
 	close(chDie)
 	<-chExit
-	log.DefaultLogger.Infof("scheduler stoped")
+	logger2.DefaultLogger.Infof("scheduler stoped")
 }
 
 func PushTask(task Task) {

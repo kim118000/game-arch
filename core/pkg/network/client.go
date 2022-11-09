@@ -1,7 +1,7 @@
 package network
 
 import (
-	"github.com/kim118000/core/pkg/log"
+	logger2 "github.com/kim118000/core/pkg/logger"
 	"github.com/kim118000/core/toolkit"
 	"net"
 	"sync/atomic"
@@ -54,7 +54,7 @@ begin:
 
 	conn, err := net.DialTimeout("tcp", addr.Addr, c.timeout)
 	if err != nil {
-		log.DefaultLogger.Warnf("net connect failure %s error %s", addr.String(), err)
+		logger2.DefaultLogger.Warnf("net connect failure %s error %s", addr.String(), err)
 		if addr.Reconnect {
 			time.Sleep(2 * time.Second)
 			goto begin
@@ -80,7 +80,7 @@ func (c *Client) Close() {
 }
 
 func (c *Client) Start() {
-	log.DefaultLogger.Infof("start client work name: %s", c.Name)
+	logger2.DefaultLogger.Infof("start client work name: %s", c.Name)
 
 	for _, addr := range c.addr {
 		go c.connect(addr)
@@ -91,7 +91,7 @@ func (c *Client) Stop() {
 	c.Close()
 	//清理连接
 	c.connMgr.ClearConn()
-	log.DefaultLogger.Infof("stop client work name: %s", c.Name)
+	logger2.DefaultLogger.Infof("stop client work name: %s", c.Name)
 }
 
 func (c *Client) GetConnMgr() IConnManager {

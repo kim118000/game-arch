@@ -2,7 +2,7 @@ package pipeline
 
 import (
 	"context"
-	"github.com/kim118000/core/pkg/log"
+	logger2 "github.com/kim118000/core/pkg/logger"
 )
 
 type PipeLineHandle interface {
@@ -36,7 +36,7 @@ func (p *Channel) ExecuteBeforePipeline(ctx context.Context, data interface{}) (
 		for _, h := range p.Handlers {
 			ctx, res, err = h.Handle(ctx, res)
 			if err != nil {
-				log.DefaultLogger.Debugf("handler: broken pipeline: %s", err.Error())
+				logger2.DefaultLogger.Debugf("handler: broken pipeline: %s", err.Error())
 				return ctx, res, err
 			}
 		}

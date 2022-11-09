@@ -1,7 +1,7 @@
 package queue
 
 import (
-	"github.com/kim118000/core/pkg/log"
+	logger2 "github.com/kim118000/core/pkg/logger"
 	"sync/atomic"
 	"unsafe"
 )
@@ -33,7 +33,7 @@ func (q *lockFreeQueue) Enqueue(elem *QueueElement) {
 				break
 			}
 			drop := q.Dequeue()
-			log.DefaultLogger.Warnf("queue full drop first element %v", drop)
+			logger2.DefaultLogger.Warnf("queue full drop first element %v", drop)
 		}
 	}
 

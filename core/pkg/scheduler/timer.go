@@ -2,7 +2,7 @@ package scheduler
 
 import (
 	"container/heap"
-	"github.com/kim118000/core/pkg/log"
+	logger2 "github.com/kim118000/core/pkg/logger"
 	"runtime/debug"
 	"sync"
 	"sync/atomic"
@@ -86,7 +86,7 @@ func (t *Timer) Stop() {
 func safecall(id int64, fn TimerFunc) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.DefaultLogger.Errorf("Handle timer panic: %+v %s", err, debug.Stack())
+			logger2.DefaultLogger.Errorf("Handle timer panic: %+v %s", err, debug.Stack())
 		}
 	}()
 
@@ -117,7 +117,7 @@ func cron() {
 		if t.counter == infinite || t.counter > 0 {
 			safecall(t.id, t.fn)
 			t.elapse += int64(t.interval)
-			log.DefaultLogger.Infof("timer execute id=%d counter=%d", t.id, t.counter)
+			logger2.DefaultLogger.Infof("timer execute id=%d counter=%d", t.id, t.counter)
 			// update timer counter
 			if t.counter != infinite && t.counter > 0 {
 				t.counter--

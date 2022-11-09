@@ -4,3 +4,8 @@ ServerName = "gate"
 
 [LogConfig]
 Level = -1
+
+[RedisConfig]
+Addr = "139.196.78.71:6379"
+DB = 0
+Pwd = "com.1234"

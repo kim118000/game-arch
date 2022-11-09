@@ -9,7 +9,6 @@ type ClusterAddr struct {
 	Reconnect bool
 	IsHand    bool
 	GroupId   int
-	Count     int
 }
 
 func (c *ClusterAddr) String() string {

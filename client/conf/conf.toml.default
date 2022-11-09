@@ -1,0 +1,10 @@
+ServerPort = 10001
+ServerName = "Client"
+
+[LogConfig]
+Level = -1
+
+[RedisConfig]
+Addr = "127.0.0.1:6379"
+DB = 0
+Pwd = ""

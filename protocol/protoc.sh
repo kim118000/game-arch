@@ -39,3 +39,10 @@ protoc \
 --go_out=./proto/server/cluster \
 --go_opt=paths=source_relative \
 ./proto/cluster.proto
+
+
+protoc \
+-I=./proto/ \
+--go_out=./proto/game/ \
+--go_opt=paths=source_relative \
+./proto/game.proto

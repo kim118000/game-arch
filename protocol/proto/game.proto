@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+option go_package = "github.com/kim118000/protocol/proto/game;game";
+package protocol;
+
+message LoginRequest {
+}

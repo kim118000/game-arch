@@ -2,7 +2,7 @@ package network
 
 import (
 	"errors"
-	"github.com/kim118000/core/pkg/log"
+	logger2 "github.com/kim118000/core/pkg/logger"
 	"sync"
 	"sync/atomic"
 )
@@ -36,7 +36,7 @@ func (connMgr *ConnManager) Add(conn IConnection) {
 	//将conn连接添加到ConnMananger中
 	connMgr.connections[conn.GetConnID()] = conn
 	connMgr.counter(1)
-	log.DefaultLogger.Infof("connection add to ConnManager connid=%d,successfully: conn num=%d", conn.GetConnID(), connMgr.Count())
+	logger2.DefaultLogger.Infof("connection add to ConnManager connid=%d,successfully: conn num=%d", conn.GetConnID(), connMgr.Count())
 }
 
 //Remove 删除连接
@@ -46,7 +46,7 @@ func (connMgr *ConnManager) Remove(conn IConnection) {
 	//删除连接信息
 	delete(connMgr.connections, conn.GetConnID())
 	connMgr.counter(-1)
-	log.DefaultLogger.Infof("connection remove connid=%d,successfully: conn num=%d", conn.GetConnID(), connMgr.Count())
+	logger2.DefaultLogger.Infof("connection remove connid=%d,successfully: conn num=%d", conn.GetConnID(), connMgr.Count())
 }
 
 //Get 利用ConnID获取链接
@@ -64,7 +64,7 @@ func (connMgr *ConnManager) Get(connID uint32) (IConnection, error) {
 
 //ClearConn 清除并停止所有连接
 func (connMgr *ConnManager) ClearConn() {
-	log.DefaultLogger.Infof("clear all connections start....conn num=%d", connMgr.Count())
+	logger2.DefaultLogger.Infof("clear all connections start....conn num=%d", connMgr.Count())
 
 	connMgr.connLock.RLock()
 	var arr []IConnection = make([]IConnection, 0, connMgr.Count())
@@ -76,7 +76,7 @@ func (connMgr *ConnManager) ClearConn() {
 	for _, conn := range arr {
 		conn.Stop()
 	}
-	log.DefaultLogger.Infof("clear all connections successfully: conn num=%d", connMgr.Count())
+	logger2.DefaultLogger.Infof("clear all connections successfully: conn num=%d", connMgr.Count())
 }
 
 //ClearOneConn  利用ConnID获取一个链接 并且删除
@@ -87,11 +87,11 @@ func (connMgr *ConnManager) ClearOneConn(connID uint32) {
 	connMgr.connLock.RUnlock()
 
 	if !ok {
-		log.DefaultLogger.Infof("clear connections id=%d not found", connID)
+		logger2.DefaultLogger.Infof("clear connections id=%d not found", connID)
 		return
 	}
 	conn.Stop()
-	log.DefaultLogger.Infof("clear connections id=%d successfully", connID)
+	logger2.DefaultLogger.Infof("clear connections id=%d successfully", connID)
 }
 
 func (connMgr *ConnManager) Broadcast(msg INetMessage) {

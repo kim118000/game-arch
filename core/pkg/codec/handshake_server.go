@@ -2,8 +2,8 @@ package codec
 
 import (
 	"context"
-	"github.com/kim118000/core/constant"
-	"github.com/kim118000/core/pkg/log"
+	"github.com/kim118000/core/internal/constant"
+	logger2 "github.com/kim118000/core/pkg/logger"
 	"github.com/kim118000/core/pkg/network"
 	"github.com/kim118000/core/pkg/pool/byteslice"
 	"github.com/kim118000/core/toolkit"
@@ -38,7 +38,7 @@ func (shs *ServerHandShakeDecoder) Decode(ctx context.Context, conn network.ICon
 
 		conn.GetDecodePipeLine().Remove(dpc)
 
-		log.DefaultLogger.Infof("%s hand shake success", conn)
+		logger2.DefaultLogger.Infof("%s hand shake success", conn)
 		return nil, nil, nil
 	}
 

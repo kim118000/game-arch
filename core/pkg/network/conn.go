@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/kim118000/core/pkg/log"
+	logger2 "github.com/kim118000/core/pkg/logger"
 	"github.com/kim118000/core/pkg/pool/byteslice"
 	"github.com/kim118000/core/toolkit/queue"
 	"net"
@@ -88,8 +88,8 @@ func NewConnection(conn net.Conn, connID uint32, in []EncoderHandle, out []Decod
 
 //StartWriter 写消息Goroutine， 用户将数据发送给客户端
 func (c *Connection) StartWriter() {
-	log.DefaultLogger.Infof("%s [writer goroutine is running]", c)
-	defer log.DefaultLogger.Infof("%s [conn writer exit!]", c)
+	logger2.DefaultLogger.Infof("%s [writer goroutine is running]", c)
+	defer logger2.DefaultLogger.Infof("%s [conn writer exit!]", c)
 	defer c.Stop()
 
 	for {
@@ -97,15 +97,15 @@ func (c *Connection) StartWriter() {
 		case data, ok := <-c.msgBuffChan:
 			if ok {
 				//有数据要写给客户端
-				log.DefaultLogger.Infof("%s send data msgid=%d datalength=%d", c, data.GetMsgID(), data.GetDataLen())
+				logger2.DefaultLogger.Infof("%s send data msgid=%d datalength=%d", c, data.GetMsgID(), data.GetDataLen())
 				if _, err := c.conn.Write(data.GetData()); err != nil {
 					c.reliveMessage(data)
-					log.DefaultLogger.Errorf("%s send data error %v", c, err)
+					logger2.DefaultLogger.Errorf("%s send data error %v", c, err)
 					return
 				}
 				c.reliveMessage(data)
 			} else {
-				log.DefaultLogger.Infof("%s MsgBuffChan is Closed", c)
+				logger2.DefaultLogger.Infof("%s MsgBuffChan is Closed", c)
 				break
 			}
 		case <-c.ctx.Done():
@@ -121,8 +121,8 @@ func (c *Connection) reliveMessage(message INetMessage) {
 
 //StartReader 读消息Goroutine，用于从客户端中读取数据
 func (c *Connection) StartReader() {
-	log.DefaultLogger.Infof("%s [reader goroutine is running]", c)
-	defer log.DefaultLogger.Infof("%s [conn reader exit!]", c)
+	logger2.DefaultLogger.Infof("%s [reader goroutine is running]", c)
+	defer logger2.DefaultLogger.Infof("%s [conn reader exit!]", c)
 	defer c.Stop()
 
 	//读
@@ -138,7 +138,7 @@ func (c *Connection) StartReader() {
 				c.reliveMessage(message)
 			}
 			if err != nil{
-				log.DefaultLogger.Debugf("%s decode process error %v", c, err)
+				logger2.DefaultLogger.Debugf("%s decode process error %v", c, err)
 				return
 			}
 		}
@@ -199,7 +199,7 @@ func (c *Connection) finalizer() {
 	//关闭该链接全部管道
 	close(c.msgBuffChan)
 
-	log.DefaultLogger.Infof("%s finalizer successfully", c)
+	logger2.DefaultLogger.Infof("%s finalizer successfully", c)
 }
 
 //GetTCPConnection 从当前连接获取原始的socket
@@ -245,7 +245,7 @@ g:
 
 	data, err := c.encode.Encode(c.ctx, msg)
 	if err != nil {
-		log.DefaultLogger.Errorf("%s encode msg error %v", c, err)
+		logger2.DefaultLogger.Errorf("%s encode msg error %v", c, err)
 		return fmt.Errorf("%s encode msg error", c)
 	}
 
@@ -257,7 +257,7 @@ g:
 		val.Elem = data
 		c.queue.Enqueue(val)
 
-		log.DefaultLogger.Errorf("%s write Message timeout queue size=%d", c, c.queue.Len())
+		logger2.DefaultLogger.Errorf("%s write Message timeout queue size=%d", c, c.queue.Len())
 		return errors.New("write message timeout")
 	case c.msgBuffChan <- data:
 		return nil

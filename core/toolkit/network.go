@@ -1,7 +1,7 @@
 package toolkit
 
 import (
-	"github.com/kim118000/core/constant"
+	"github.com/kim118000/core/internal/constant"
 	"github.com/kim118000/core/pkg/pool/byteslice"
 	"math"
 )

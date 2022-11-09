@@ -3,8 +3,8 @@ package codec
 import (
 	"context"
 	"encoding/binary"
-	"github.com/kim118000/core/constant"
-	"github.com/kim118000/core/pkg/log"
+	"github.com/kim118000/core/internal/constant"
+	logger2 "github.com/kim118000/core/pkg/logger"
 	"github.com/kim118000/core/pkg/network"
 	"github.com/kim118000/core/pkg/pool/byteslice"
 	"io"
@@ -28,7 +28,7 @@ func (f *FixLengthDecoder) Decode(ctx context.Context, conn network.IConnection,
 	}
 
 	msgLen := binary.LittleEndian.Uint32(headData)
-	log.DefaultLogger.Debugf("conn[%s] read message length=%d", conn, msgLen)
+	logger2.DefaultLogger.Debugf("%s read message length=%d", conn, msgLen)
 
 	if msgLen < 1 || msgLen > 1024*8 {
 		return nil, nil, constant.ErrWrongDatapackLength
@@ -37,7 +37,7 @@ func (f *FixLengthDecoder) Decode(ctx context.Context, conn network.IConnection,
 	data := byteslice.Get(int(msgLen))
 	if _, err := io.ReadFull(conn.GetTCPConnection(), data); err != nil {
 		byteslice.Put(data)
-		log.DefaultLogger.Errorf("conn[%s] read message body error %s", conn, err.Error())
+		logger2.DefaultLogger.Errorf("%s read message body error %s", conn, err.Error())
 		return nil, nil, err
 	}
 
