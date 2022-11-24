@@ -12,7 +12,7 @@ func HandshakeByte() []byte {
 	var check byte = 0x70
 
 	for i := 1; i < len(arr); i++ {
-		arr[i] = byte(Rand.Rand(math.MaxInt32))
+		arr[i] = byte(RandInt(1, math.MaxInt32))
 		check ^= arr[i]
 	}
 	arr[0] = check

@@ -3,7 +3,7 @@ package handler
 import (
 	"context"
 	"github.com/kim118000/client/internal/constant"
-	"github.com/kim118000/client/internal/service"
+	"github.com/kim118000/core/pkg/logger"
 	"github.com/kim118000/core/pkg/network"
 	"github.com/kim118000/core/pkg/pool/byteslice"
 	"github.com/kim118000/protocol/proto/gate"
@@ -27,7 +27,7 @@ func (l *AuthenticateHandler) Decode(ctx context.Context, conn network.IConnecti
 	var response gate.AuthenticationResponse
 	ex := proto.Unmarshal(message.GetData(), &response)
 	if ex != nil {
-		service.Log.Errorf("auth proto unmarshal error %s", ex)
+		logger.Log.Errorf("auth proto unmarshal error %s", ex)
 		return nil, msg, ex
 	}
 
@@ -35,7 +35,7 @@ func (l *AuthenticateHandler) Decode(ctx context.Context, conn network.IConnecti
 		return nil, msg, constant.ErrWrongAuthFailure
 	}
 
-	service.Log.Infof("auth ok start login.....")
+	logger.Log.Infof("auth ok start login.....")
 
 	byteslice.Put(message.GetData())
 	network.PutMessage(message)

@@ -1,7 +1,7 @@
 package mock
 
 import (
-	"github.com/kim118000/client/internal/service"
+	"github.com/kim118000/core/pkg/logger"
 	"github.com/kim118000/core/pkg/network"
 	content2 "github.com/kim118000/protocol/proto/common/content"
 	"github.com/kim118000/protocol/proto/common/id"
@@ -27,7 +27,7 @@ func init() {
 func SendMsg(c *network.Client, connId uint32, msgId id.MessageId, m proto.Message) {
 	content, err := proto.Marshal(m)
 	if err != nil {
-		service.Log.Infof("proto marshal %v", err)
+		logger.Log.Infof("proto marshal %v", err)
 		return
 	}
 
@@ -39,7 +39,7 @@ func SendMsg(c *network.Client, connId uint32, msgId id.MessageId, m proto.Messa
 	}
 	conn, _ := c.GetConnMgr().Get(connId)
 	if conn == nil {
-		service.Log.Errorf("conn not found %d", connId)
+		logger.Log.Errorf("conn not found %d", connId)
 		return
 	}
 	msg := network.GetMessage()

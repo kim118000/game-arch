@@ -3,7 +3,7 @@ package handler
 import (
 	"context"
 	"github.com/kim118000/client/internal/constant"
-	"github.com/kim118000/client/internal/service"
+	"github.com/kim118000/core/pkg/logger"
 	"github.com/kim118000/core/pkg/network"
 	"github.com/kim118000/protocol/proto/common/content"
 	"google.golang.org/protobuf/proto"
@@ -26,11 +26,11 @@ func (l *ClientMessageDispatcher) Decode(ctx context.Context, conn network.IConn
 	var response content.ClientOutboundMessage
 	ex := proto.Unmarshal(message.GetData(), &response)
 	if ex != nil {
-		service.Log.Errorf("client message proto unmarshal error %s", ex)
+		logger.Log.Errorf("client message proto unmarshal error %s", ex)
 		return nil, msg, ex
 	}
 
-	service.Log.Infof("===== %s", response)
+	logger.Log.Infof("===== %s", response)
 
 	return dpc.GetNext(), msg, nil
 }

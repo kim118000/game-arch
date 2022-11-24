@@ -2,20 +2,22 @@ package session
 
 import (
 	"errors"
+	"fmt"
+	"github.com/kim118000/core/define"
 	"github.com/kim118000/core/pkg/logger"
+	"github.com/kim118000/core/pkg/redis"
 	"github.com/kim118000/core/pkg/scheduler"
 	"github.com/kim118000/gate/internal/conf"
 	"github.com/kim118000/gate/internal/constant"
 	"sync"
 	"sync/atomic"
+	"time"
 )
 
-var (
-	SessionMgr *SessionManager
-)
+var SessionMgr *SessionManager
 
 func init() {
-	SessionMgr = NewSessionManager(10, 3000)
+	SessionMgr = NewSessionManager(10, conf.Config.MaxConn)
 }
 
 type SessionManager struct {
@@ -26,7 +28,7 @@ type SessionManager struct {
 	onlineNumber          int64
 }
 
-func NewSessionManager(interval int, maxSessions int) *SessionManager {
+func NewSessionManager(interval int, maxSessions uint32) *SessionManager {
 	return &SessionManager{
 		sessions:              make(map[uint64]*Session, maxSessions),
 		syncClientNumInterval: interval,
@@ -39,13 +41,13 @@ func (sm *SessionManager) Add(session *Session) {
 	defer sm.Unlock()
 
 	var counter = true
-	if sess, ok := sm.sessions[session.GetUserId()]; ok {
+	if sess, ok := sm.sessions[session.GetRoleId()]; ok {
 		sess.GetConn().RemoveProperty(constant.SessionAttrKey)
 		sess.Kick()
 		counter = false
 	}
 
-	sm.sessions[session.GetUserId()] = session
+	sm.sessions[session.GetRoleId()] = session
 	if counter {
 		sm.SyncOnlineNumber(1)
 	}
@@ -55,9 +57,9 @@ func (sm *SessionManager) Remove(session *Session) bool {
 	sm.Lock()
 	defer sm.Unlock()
 
-	_, ok := sm.sessions[session.GetUserId()]
+	_, ok := sm.sessions[session.GetRoleId()]
 	if ok {
-		delete(sm.sessions, session.GetUserId())
+		delete(sm.sessions, session.GetRoleId())
 		sm.SyncOnlineNumber(-1)
 		return true
 	}
@@ -83,7 +85,8 @@ func (sm *SessionManager) SyncOnlineNumber(delta int64) {
 }
 
 func (sm *SessionManager) SyncClientNumber() {
-	logger.DefaultLogger.Infof("current online number %d", sm.LoadOnlineNumber())
+	redis.Client.Set(fmt.Sprintf("%s%d", define.GateOnlineNumber, conf.Config.ServerId), sm.LoadOnlineNumber(), -1 * time.Second)
+	logger.Log.Infof("current online number %d", sm.LoadOnlineNumber())
 }
 
 func (sm *SessionManager) Init(conf *conf.ServerConfig) {

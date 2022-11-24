@@ -11,7 +11,7 @@ import (
 
 func TestName(t *testing.T) {
 	a := &gate.AuthenticationRequest{
-		UserId:  111,
+		RoleId:  111,
 		TokenTs: 11111,
 		Sign:    "aaaa",
 	}

@@ -12,22 +12,23 @@ import (
 )
 
 func main() {
-
 	confFile := file.PathJoin("conf/conf.toml")
-	if _, err := toml.DecodeFile(confFile, conf.Config); err != nil {
+	if _, err := toml.DecodeFile(confFile, conf.SC); err != nil {
 		fmt.Println(err)
 		return
 	}
-	service.InitService(conf.Config)
+
+	service.ServicesContainer.InitConfig(conf.SC)
+	service.ServicesContainer.Start()
 
 	serve := &http.Server{
 		Handler: handler.GetServerRouter(),
-		Addr:    fmt.Sprintf(":%d", conf.Config.ServerPort),
+		Addr:    fmt.Sprintf(":%d", conf.SC.ServerPort),
 	}
 
 	go serve.ListenAndServe()
 
 	toolkit.RegisterSignal(func() {
-		service.StopService()
+		service.ServicesContainer.Stop()
 	})
 }

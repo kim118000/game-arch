@@ -2,28 +2,28 @@ package service
 
 import "github.com/kim118000/client/internal/conf"
 
-var (
-	services []IService
-)
+type ServicesList []IService
+
+var ServicesContainer = make(ServicesList, 0)
 
 func init() {
-	services = append(services, Service)
+	ServicesContainer = append(ServicesContainer, ClientService)
 }
 
-func InitService(conf *conf.ServerConfig) {
-	for _, v := range services {
+func (sl *ServicesList) InitConfig(conf *conf.ServerConfig) {
+	for _, v := range *sl {
 		v.Init(conf)
 	}
 }
 
-func StartService() {
-	for _, v := range services {
+func (sl *ServicesList) Start() {
+	for _, v := range *sl {
 		v.Start()
 	}
 }
 
-func StopService() {
-	for _, v := range services {
+func (sl *ServicesList) Stop() {
+	for _, v := range *sl {
 		v.Stop()
 	}
 }

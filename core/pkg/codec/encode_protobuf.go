@@ -2,7 +2,7 @@ package codec
 
 import (
 	"context"
-	logger2 "github.com/kim118000/core/pkg/logger"
+	"github.com/kim118000/core/pkg/logger"
 	"github.com/kim118000/core/pkg/network"
 	"github.com/kim118000/core/pkg/pool/byteslice"
 	"google.golang.org/protobuf/proto"
@@ -33,7 +33,7 @@ func (pb *ProtoBufEncoder) Encode(ctx context.Context, dpc *network.DefaultPipeL
 	}
 
 	msg.SetData(body)
-	logger2.DefaultLogger.Debugf("encode protobuf message %s", protoMsg)
+	logger.DefaultLogger.Debugf("encode protobuf message %s", protoMsg)
 
 	return dpc.GetNext(), msg, nil
 }

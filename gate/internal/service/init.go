@@ -19,7 +19,6 @@ func init() {
 
 	services = append(services, GS)
 	services = append(services, session.SessionMgr)
-
 }
 
 func InitService(conf *conf.ServerConfig) {

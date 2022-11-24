@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/go-redis/redis/v8"
 	"time"
 	"unsafe"
@@ -54,5 +55,10 @@ func NewRedisClient(addr string, ops ...Option) *RedisClient {
 }
 
 func (rc *RedisClient) Set(key string, value interface{}, expiration time.Duration) {
-	rc.Client.Set(context.Background(), key, value, expiration)
+	val, _ := json.Marshal(value)
+	rc.Client.Set(context.Background(), key, val, expiration)
+}
+
+func (rc *RedisClient) Get(key string) string {
+	return rc.Client.Get(context.Background(), key).Val()
 }

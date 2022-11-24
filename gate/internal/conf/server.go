@@ -10,6 +10,8 @@ var Config = new(ServerConfig)
 
 type ServerConfig struct {
 	config.ServerBase
+	MaxConn uint32
+	SendBuffLength uint32
 	LogConfig   logger.LogConfig  `toml:"LogConfig"`
 	RedisConfig redis.RedisConfig `toml:"RedisConfig"`
 }

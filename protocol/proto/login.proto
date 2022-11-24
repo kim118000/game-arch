@@ -4,6 +4,15 @@ option go_package = "github.com/kim118000/protocol/proto/login;login";
 package protocol;
 
 message LoginInfo {
-  fixed64 user_id = 1;
-  fixed32 server_id = 2;
+  fixed64 role_id = 1;
+  fixed32 game_server_id = 2;
+  fixed32 gate_server_id = 3;
+  string secret = 4;
+}
+
+message LoginAuthInfo {
+  fixed64 role_id = 1;
+  fixed32 token_ts = 2;
+  string sign = 3;
+  string gate = 4;
 }

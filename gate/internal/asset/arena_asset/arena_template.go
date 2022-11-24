@@ -3,7 +3,7 @@ package arena_asset
 import (
 	"encoding/json"
 	"github.com/kim118000/core/pkg/config"
-	"github.com/kim118000/gate/internal/service"
+	"github.com/kim118000/core/pkg/logger"
 )
 
 var ArenaTemplate = new(arenaTemplate)
@@ -23,14 +23,14 @@ func (at *arenaTemplate) GetFileName() string {
 func (at *arenaTemplate) Load(loader config.ILoader) {
 	content, err := loader.Load(at.GetFileName())
 	if err != nil {
-		service.GateLog.Errorf("arena template load err %s", err)
+		logger.Log.Errorf("arena template load err %s", err)
 		return
 	}
 
 	at.VoList = new(ArenaVoList)
 	errJson := json.Unmarshal(content, at.VoList)
 	if errJson != nil {
-		service.GateLog.Errorf("arena template unmarshal json err %s", err)
+		logger.Log.Errorf("arena template unmarshal json err %s", err)
 	}
 
 	at.VoList.Init()

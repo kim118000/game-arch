@@ -96,6 +96,11 @@ func (u *timeUtil) TimeToStamp(t time.Time) int64 {
 	return t.UnixNano() / 1e6
 }
 
+// 将时间转为毫秒级时间戳
+func (u *timeUtil) TimeToSecond(t time.Time) uint32 {
+	return uint32(t.UnixNano() / 1e6 /1000)
+}
+
 // 将时间转为默认样式的字符串
 func (u *timeUtil) TimeToText(t time.Time) string {
 	return t.Format(u.Layout)

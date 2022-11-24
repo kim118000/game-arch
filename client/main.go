@@ -7,6 +7,7 @@ import (
 	"github.com/kim118000/client/internal/handler"
 	"github.com/kim118000/client/internal/service"
 	"github.com/kim118000/client/mock"
+	"github.com/kim118000/core/pkg/logger"
 	"github.com/kim118000/core/pkg/network"
 	"github.com/kim118000/core/toolkit"
 	"github.com/kim118000/core/toolkit/file"
@@ -17,13 +18,12 @@ func main() {
 	//auth val := `{"userId":111,"tokenTs":111,"sign":""}`
 	//login {"userId":111}
 
-
 	confFile := file.PathJoin("conf/conf.toml")
 	if _, err := toml.DecodeFile(confFile, conf.Config); err != nil {
 		fmt.Println(err)
 		return
 	}
-	service.InitService(conf.Config)
+	service.ServicesContainer.InitConfig(conf.Config)
 
 	c := network.NewClient("client", conf.Config.ClusterAddr, 1000, outProcessor(), inProcessor())
 	c.Start()
@@ -31,7 +31,7 @@ func main() {
 	go stdin(c)
 
 	toolkit.RegisterSignal(func() {
-		service.StopService()
+		service.ServicesContainer.Stop()
 	})
 }
 
@@ -46,7 +46,7 @@ func stdin(c *network.Client) {
 
 		mock, ok := mock.Mocks[id]
 		if !ok {
-			service.Log.Errorf("not found mock")
+			logger.Log.Errorf("not found mock")
 			continue
 		}
 

@@ -26,7 +26,7 @@ func (lce *ListenerConnEvent) OnCreate(conn network.IConnection) {
 }
 
 func (lce *ListenerConnEvent) OnConnStart(conn network.IConnection) {
-	logger.DefaultLogger.Infof("%s start ....", conn)
+	logger.Log.Infof("%s start ....", conn)
 }
 
 func (lce *ListenerConnEvent) OnConnStop(conn network.IConnection) {
@@ -37,7 +37,7 @@ func (lce *ListenerConnEvent) OnConnStop(conn network.IConnection) {
 	sess, _ := val.(*session.Session)
 	sess.RemoveSession()
 
-	logger.DefaultLogger.Infof("%s stop ....", conn)
+	logger.Log.Infof("%s stop ....", conn)
 }
 
 func (lce *ListenerConnEvent) OnClose(conn network.IConnection) {

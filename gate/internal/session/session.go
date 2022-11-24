@@ -2,25 +2,31 @@ package session
 
 import (
 	"fmt"
+	"github.com/kim118000/core/define"
 	"github.com/kim118000/core/pkg/logger"
 	"github.com/kim118000/core/pkg/network"
+	"github.com/kim118000/core/pkg/redis"
 	"github.com/kim118000/core/pkg/scheduler"
 	"github.com/kim118000/core/toolkit"
+	"github.com/kim118000/gate/internal/conf"
 	"github.com/kim118000/gate/internal/constant"
+	"github.com/kim118000/protocol/proto/login"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
+	"strings"
 	"sync/atomic"
 	"time"
 )
 
 type Session struct {
 	conn       network.IConnection
-	userId     uint64
+	roleId     uint64
 	onlineTime time.Time
 
 	authRedisKey string
 	authSuccess  int32
-
-	sessionMgr *SessionManager
+	loginInfo    *login.LoginInfo
+	sessionMgr   *SessionManager
 }
 
 func NewSession(conn network.IConnection, mgr *SessionManager) *Session {
@@ -34,8 +40,8 @@ func NewSession(conn network.IConnection, mgr *SessionManager) *Session {
 	return s
 }
 
-func (s *Session) GetUserId() uint64 {
-	return s.userId
+func (s *Session) GetRoleId() uint64 {
+	return s.roleId
 }
 
 func (s *Session) GetConn() network.IConnection {
@@ -57,7 +63,7 @@ func (s *Session) Kick() {
 		return
 	}
 	s.conn.Stop()
-	logger.DefaultLogger.Infof("kick session offline %s", s)
+	logger.Log.Infof("kick session offline %s", s)
 }
 
 func (s *Session) RemoveSession() {
@@ -69,50 +75,56 @@ func (s *Session) RemoveSession() {
 
 //通知game下线
 func (s *Session) OffLine() {
-
+	s.loginInfo = nil
 }
 
-func (s *Session) Auth(userId uint64, tokenTs int, sign string) bool {
-	now := int(time.Now().UnixMilli() / 1000)
-	diff := now - tokenTs
+func (s *Session) Auth(roleId uint64, tokenTs uint32, sign string) bool {
+	now := toolkit.TimeUtils.TimeToSecond(time.Now())
+	diff := int(now - tokenTs)
 	if diff < -constant.AuthenticateTokenDiff || diff > constant.AuthenticateTokenDiff {
-		//return false
+		return false
 	}
 
-	s.authRedisKey = fmt.Sprintf("AUTH:%d", userId)
+	s.authRedisKey = fmt.Sprintf("%s%d", define.LoginInfoKey, roleId)
 
 	//TODO
-	//从redis加载AuthContract
-	var authContract *AuthContract
+	ls := redis.Client.Get(s.authRedisKey)
+	if ls == "" {
+		return false
+	}
 
-	if authContract != nil && authContract.GateId == 1 {
-		md5 := toolkit.Crypto.Md5(fmt.Sprintf("%d%d%s", userId, tokenTs, authContract.Secret))
+	var loginInfo = &login.LoginInfo{}
+	_ = protojson.Unmarshal(toolkit.StringToBytes(ls), loginInfo)
+
+	if loginInfo.GateServerId == uint32(conf.Config.ServerId) {
+
+		var str strings.Builder
+		str.WriteString(fmt.Sprintf("%d|%d|%d|%s", conf.Config.ServerId, roleId, tokenTs, loginInfo.Secret))
+		md5 := toolkit.Crypto.Md5(str.String())
 		if sign == md5 {
-			s.AuthSuccess(userId)
+			s.AuthSuccess(roleId, loginInfo)
 			return true
 		}
 	}
 
-	//todo 临时通过
-	s.AuthSuccess(userId)
-	return true
+	return false
 }
 
-func (s *Session) AuthSuccess(userId uint64) {
-	s.userId = userId
+func (s *Session) AuthSuccess(roleId uint64, loginInfo *login.LoginInfo) {
+	s.roleId = roleId
 	s.onlineTime = time.Now()
 
 	s.sessionMgr.Add(s)
 	s.SetAuthSuccess()
-	s.LoadLoginInfo()
+	s.LoadLoginInfo(loginInfo)
 
 	scheduler.NewAfterTimerBySecondOnce(constant.AuthenticateTokenRefreshInterval, func() {
-		s.RefreshAuthToken()
+		s.RefreshLoginInfo()
 	})
 }
 
-func (s *Session) LoadLoginInfo() {
-
+func (s *Session) LoadLoginInfo(loginInfo *login.LoginInfo) {
+	s.loginInfo = loginInfo
 }
 
 func (s *Session) IsAuthSuccess() bool {
@@ -127,8 +139,9 @@ func (s *Session) SetAuthSuccess() {
 }
 
 //定时刷新token过期时间
-func (s *Session) RefreshAuthToken() {
-	logger.DefaultLogger.Infof("refresh auth token expire time user=", s)
+func (s *Session) RefreshLoginInfo() {
+	loginKey := fmt.Sprintf("%s%d", define.LoginInfoKey, s.roleId)
+	redis.Client.Set(loginKey, s.loginInfo, 30*time.Minute)
 }
 
 func (s *Session) GetGameNode() network.IConnection {
@@ -136,5 +149,5 @@ func (s *Session) GetGameNode() network.IConnection {
 }
 
 func (s *Session) String() string {
-	return fmt.Sprintf("[userId=%d]", s.userId)
+	return fmt.Sprintf("[roleId=%d]", s.roleId)
 }

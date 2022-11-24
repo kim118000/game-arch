@@ -2,17 +2,16 @@ package handler
 
 import (
 	"context"
+	"github.com/kim118000/core/pkg/logger"
 	"github.com/kim118000/core/pkg/network"
 	"github.com/kim118000/core/pkg/pool/byteslice"
 	"github.com/kim118000/gate/internal/constant"
-	"github.com/kim118000/gate/internal/service"
 	"github.com/kim118000/gate/internal/session"
 	"github.com/kim118000/protocol/proto/gate"
 	"google.golang.org/protobuf/proto"
 )
 
-type AuthenticateHandler struct {
-}
+type AuthenticateHandler struct {}
 
 func NewAuthenticateHandler() *AuthenticateHandler {
 	return &AuthenticateHandler{
@@ -28,7 +27,7 @@ func (l *AuthenticateHandler) Decode(ctx context.Context, conn network.IConnecti
 	var request gate.AuthenticationRequest
 	ex := proto.Unmarshal(message.GetData(), &request)
 	if ex != nil {
-		service.GateLog.Errorf("auth proto unmarshal error %s", ex)
+		logger.Log.Errorf("auth proto unmarshal error %s", ex)
 		return nil, msg, ex
 	}
 
@@ -38,7 +37,7 @@ func (l *AuthenticateHandler) Decode(ctx context.Context, conn network.IConnecti
 	}
 
 	sess, _ := val.(*session.Session)
-	ok = sess.Auth(request.UserId, int(request.TokenTs), request.Sign)
+	ok = sess.Auth(request.RoleId, request.TokenTs, request.Sign)
 	if !ok {
 		return nil, msg, constant.ErrWrongAuthFailure
 	}

@@ -1,6 +1,8 @@
-
 ServerPort = 8999
 ServerName = "gate"
+ServerId = 1
+MaxConn = 1000
+SendBuffLength = 2000
 
 [LogConfig]
 Level = -1
@@ -9,3 +11,8 @@ Level = -1
 Addr = "127.0.0.1:6379"
 DB = 0
 Pwd = ""
+
+[DbConfig]
+Dns = "kim118000:com.1234@tcp(127.0.0.1:3306)/game_sys?charset=utf8mb4&parseTime=true"
+MaxConnNumber = 20
+IdleConnNumber = 10

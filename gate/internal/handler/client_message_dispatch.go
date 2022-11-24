@@ -2,17 +2,16 @@ package handler
 
 import (
 	"context"
+	"github.com/kim118000/core/pkg/logger"
 	"github.com/kim118000/core/pkg/network"
 	"github.com/kim118000/gate/internal/constant"
-	"github.com/kim118000/gate/internal/service"
 	"github.com/kim118000/gate/internal/session"
 	"github.com/kim118000/protocol/proto/common/content"
 	"github.com/kim118000/protocol/proto/server/cluster"
 	"google.golang.org/protobuf/proto"
 )
 
-type ClientMessageDispatcher struct {
-}
+type ClientMessageDispatcher struct {}
 
 func NewClientMessageDispatcher() *ClientMessageDispatcher {
 	return &ClientMessageDispatcher{
@@ -28,7 +27,7 @@ func (l *ClientMessageDispatcher) Decode(ctx context.Context, conn network.IConn
 	var request content.ClientInboundMessage
 	ex := proto.Unmarshal(message.GetData(), &request)
 	if ex != nil {
-		service.GateLog.Errorf("client message dispatch proto unmarshal error %s", ex)
+		logger.Log.Errorf("client message dispatch proto unmarshal error %s", ex)
 		return nil, msg, ex
 	}
 
@@ -39,7 +38,7 @@ func (l *ClientMessageDispatcher) Decode(ctx context.Context, conn network.IConn
 
 	val, err := conn.GetProperty(constant.SessionAttrKey)
 	if err != nil {
-		service.GateLog.Errorf("client message dispatch session not found [%s]", conn)
+		logger.Log.Errorf("client message dispatch session not found [%s]", conn)
 		return nil, msg, ex
 	}
 
@@ -55,10 +54,10 @@ func (l *ClientMessageDispatcher) Decode(ctx context.Context, conn network.IConn
 			rpcMsg.MessageCategory = cluster.MessageCategory_MESSAGE_CATEGORY_CLIENT_IN
 			rpcMsg.MessageId = request.MessageId
 			rpcMsg.ClientRequestId = request.RequestId
-			rpcMsg.UserId = sess.GetUserId()
+			rpcMsg.RoleId = sess.GetRoleId()
 			rpcMsg.Content = request.Content
 
-			service.GateLog.Debugf("=========%s", rpcMsg)
+			logger.Log.Debugf("=========%s", rpcMsg)
 			//data := network.GetMessage()
 			//data.Init(uint32(request.MessageId.Number()), rpcMsg)
 			//gameNode.SendMsg(data)

@@ -29,7 +29,7 @@ message RPCMessage {
   int32 request_id = 3;//RPC请求ID
   int32 client_request_id = 4;//客户端请求ID
   bytes content = 5;   //当category为clientout时，此字段无效
-  fixed64 user_id = 6;
+  fixed64 role_id = 6;
   CodeId code_id = 7;
   repeated ClientOutboundContent client_content = 8; //仅当category为clientout时，此字段有效。发送给客户端的消息内容
 }

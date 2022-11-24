@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/kim118000/core/pkg/config"
+	"github.com/kim118000/core/pkg/logger"
 	"github.com/kim118000/core/pkg/network"
 	"github.com/kim118000/core/toolkit"
 	"github.com/kim118000/core/toolkit/file"
@@ -14,23 +14,22 @@ import (
 )
 
 func main() {
-
 	confFile := file.PathJoin("conf/conf.toml")
 
-	var serverConfig *conf.ServerConfig
-	if _, err := toml.DecodeFile(confFile, &serverConfig); err != nil {
-		fmt.Println(err)
+	if _, err := toml.DecodeFile(confFile, conf.Config); err != nil {
+		logger.Log.Errorf("load server config err %s", err)
 		return
 	}
 
-	service.InitService(serverConfig)
+	service.InitService(conf.Config)
+	service.StartService()
 
 	loader := config.NewFileLoader(file.PathJoin("json"))
 	manager := config.NewConfigManager(loader)
 	manager.RegTemplate(arena_asset.ArenaTemplate)
 	manager.LoadTemplate()
 
-	server := network.NewServer("gate", "", 8999, 1000, 1000, outProcessor(), inProcessor(), network.WithConnEvent(service.ConnEvent))
+	server := network.NewServer(conf.Config.ServerName, "", uint16(conf.Config.ServerPort), conf.Config.MaxConn, conf.Config.SendBuffLength, outProcessor(), inProcessor(), network.WithConnEvent(service.ConnEvent))
 	server.Start()
 
 	toolkit.RegisterSignal(func() {
@@ -38,9 +37,7 @@ func main() {
 	})
 }
 
-
 func inProcessor() []network.DecoderHandle {
-
 	var args = []network.DecoderHandle{
 		func() network.Decoder {
 			return handler.ServerHandShakeDecoder
@@ -52,7 +49,6 @@ func inProcessor() []network.DecoderHandle {
 			return handler.AuthDecoder
 		},
 	}
-
 	return args
 }
 
@@ -65,6 +61,5 @@ func outProcessor() []network.EncoderHandle {
 			return handler.FixLengthEncoder
 		},
 	}
-
 	return args
 }

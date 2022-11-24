@@ -2,7 +2,7 @@ package mock
 
 import (
 	"fmt"
-	"github.com/kim118000/client/internal/service"
+	"github.com/kim118000/core/pkg/logger"
 	"github.com/kim118000/core/pkg/network"
 	"github.com/kim118000/protocol/proto/gate"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -27,19 +27,19 @@ func (m *authMock) PrintJson() string {
 
 func (m *authMock) Request(c *network.Client, connId uint32, content string) {
 	if content == "help" {
-		service.Log.Infof("%s", m.PrintJson())
+		logger.Log.Infof("%s", m.PrintJson())
 		return
 	}
 
 	var request = &gate.AuthenticationRequest{}
 	err := protojson.Unmarshal([]byte(content), request)
 	if err != nil {
-		service.Log.Errorf("%v", err)
+		logger.Log.Errorf("%v", err)
 	}
 
 	conn, _ := c.GetConnMgr().Get(connId)
 	if conn == nil {
-		service.Log.Errorf("conn not found %d", connId)
+		logger.Log.Errorf("conn not found %d", connId)
 		return
 	}
 	msg := network.GetMessage()
